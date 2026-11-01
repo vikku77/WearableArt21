@@ -1,0 +1,1527 @@
+# This workflow will build and push a node.js application to an Azure Web App when a commit is pushed to your default branch.
+#
+# This workflow assumes you have already created the target Azure App Service web app.
+# For instructions see https://docs.microsoft.com/en-us/azure/app-service/quickstart-nodejs?tabs=linux&pivots=development-environment-cli
+#
+# To configure this workflow:
+#
+# 1. Download the Publish Profile for your Azure Web App. You can download this file from the Overview page of your Web App in the Azure Portal.
+#    For more information: https://docs.microsoft.com/en-us/azure/app-service/deploy-github-actions?tabs=applevel#generate-deployment-credentials
+#
+# 2. Create a secret in your repository named AZURE_WEBAPP_PUBLISH_PROFILE, paste the publish profile contents as the value of the secret.
+#    For instructions on obtaining the publish profile see: https://docs.microsoft.com/azure/app-service/deploy-github-actions#configure-the-github-secret
+#
+# 3. Change the value for the AZURE_WEBAPP_NAME. Optionally, change the AZURE_WEBAPP_PACKAGE_PATH and NODE_VERSION environment variables below.
+#
+# For more information on GitHub Actions for Azure: https://github.com/Azure/Actions
+# For more information on the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# For more samples to get started with GitHub Action workflows to deploy to Azure: https://github.com/Azure/actions-workflow-samples
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: your-app-name    # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
+  NODE_VERSION: '20.x'                # set this to the node version to use
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: npm install, build, and test
+      run: |
+        npm install
+        npm run build --if-present
+        npm run test --if-present
+
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v4
+      with:
+        name: node-app
+        path: .
+
+  deploy:
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Development'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v4
+      with:
+        name: node-app
+
+    - name: 'Deploy to Azure WebApp'
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#126b45">
+
+<title>Vikas Patel Store | Online Shopping</title>
+
+<style>
+:root {
+  --green: #126b45;
+  --dark-green: #084c30;
+  --light-green: #eaf6ee;
+  --yellow: #ffc857;
+  --background: #f5f7f5;
+  --white: #ffffff;
+  --text: #202820;
+  --muted: #6b756d;
+  --border: #e2e9e3;
+  --red: #d93025;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+button, input, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: var(--green);
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+/* HEADER */
+
+header {
+  background: var(--green);
+  color: white;
+  padding: 17px 16px;
+}
+
+.header-inner {
+  max-width: 1150px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo h1 {
+  font-size: 23px;
+  line-height: 1.3;
+}
+
+.logo p {
+  font-size: 13px;
+  opacity: .9;
+}
+
+.location {
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.header-cart {
+  background: #ffffff18;
+  border: 1px solid #ffffff70;
+  color: white;
+  border-radius: 10px;
+  padding: 10px 13px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* HERO */
+
+.hero {
+  text-align: center;
+  padding: 42px 16px;
+  background: linear-gradient(135deg, #e2f4e7, #fff3d3);
+}
+
+.hero h2 {
+  color: var(--dark-green);
+  font-size: clamp(26px, 5vw, 40px);
+  margin-bottom: 10px;
+}
+
+.hero p {
+  max-width: 600px;
+  margin: auto;
+  color: #536357;
+}
+
+.hero-button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 22px;
+  background: var(--green);
+  color: white;
+  text-decoration: none;
+  border-radius: 9px;
+  font-weight: bold;
+}
+
+/* MAIN */
+
+.container {
+  max-width: 1150px;
+  padding: 28px 16px 100px;
+  margin: auto;
+}
+
+.section-title {
+  font-size: 25px;
+  margin-bottom: 16px;
+}
+
+.search {
+  width: 100%;
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background: white;
+}
+
+.filters {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  padding: 2px 1px 18px;
+}
+
+.filter-btn {
+  padding: 9px 16px;
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  background: white;
+  white-space: nowrap;
+}
+
+.filter-btn.active {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+/* PRODUCT GRID */
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.product-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s, box-shadow .2s;
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px #0000000c;
+}
+
+.product-card img {
+  width: 100%;
+  height: 145px;
+  object-fit: cover;
+  background: #e8eee8;
+}
+
+.product-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.product-category {
+  color: var(--green);
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.product-name {
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.product-description {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 7px 0 13px;
+}
+
+.product-bottom {
+  margin-top: auto;
+}
+
+.product-price {
+  font-size: 19px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.add-btn,
+.primary-btn {
+  background: var(--green);
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  padding: 11px;
+  width: 100%;
+  font-weight: bold;
+}
+
+.add-btn:hover,
+.primary-btn:hover {
+  background: var(--dark-green);
+}
+
+.add-btn:disabled,
+.primary-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.empty-products {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 35px;
+  color: var(--muted);
+}
+
+/* INFORMATION SECTIONS */
+
+.info-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 22px;
+  margin-top: 25px;
+}
+
+.info-card h2 {
+  margin-bottom: 10px;
+}
+
+.info-card p {
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+footer {
+  background: #123b28;
+  color: white;
+  text-align: center;
+  padding: 25px 15px;
+  font-size: 13px;
+}
+
+footer p + p {
+  margin-top: 5px;
+}
+
+/* FLOATING BUTTONS */
+
+.floating-cart {
+  position: fixed;
+  right: 16px;
+  bottom: 80px;
+  z-index: 20;
+  border: 0;
+  border-radius: 50px;
+  padding: 14px 18px;
+  background: var(--green);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 5px 20px #0003;
+}
+
+.count {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  margin-left: 5px;
+  background: var(--yellow);
+  color: #222;
+  font-size: 12px;
+}
+
+.whatsapp-float {
+  position: fixed;
+  left: 14px;
+  bottom: 18px;
+  z-index: 20;
+  border-radius: 30px;
+  padding: 12px 15px;
+  background: #168b48;
+  color: white;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px #0002;
+}
+
+/* MODAL */
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #0008;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.modal.open {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  width: 100%;
+  max-width: 540px;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 20px;
+  border-radius: 16px;
+  animation: appear .2s ease-out;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.close-btn {
+  width: 37px;
+  height: 37px;
+  border: 0;
+  border-radius: 50%;
+  background: #edf1ed;
+  font-size: 23px;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-item h3 {
+  font-size: 15px;
+}
+
+.cart-item p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 9px;
+}
+
+.quantity-controls button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  background: #f5f7f5;
+  border-radius: 7px;
+}
+
+.quantity-controls .remove-btn {
+  width: auto;
+  padding: 0 5px;
+  border: 0;
+  background: transparent;
+  color: var(--red);
+  font-size: 12px;
+}
+
+.item-subtotal {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 18px 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.small-note {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 12px 0;
+}
+
+.checkout-form {
+  display: none;
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  margin-top: 18px;
+}
+
+.checkout-form.visible {
+  display: block;
+}
+
+.checkout-form label {
+  display: block;
+  margin: 13px 0 5px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.checkout-form input,
+.checkout-form textarea {
+  display: block;
+  width: 100%;
+  border: 1px solid #d4ddd5;
+  border-radius: 8px;
+  padding: 11px;
+}
+
+.checkout-form textarea {
+  resize: vertical;
+  min-height: 75px;
+}
+
+.checkout-form .primary-btn {
+  margin-top: 15px;
+}
+
+.message {
+  display: none;
+  padding: 14px;
+  border-radius: 9px;
+  margin-top: 15px;
+  background: #e5f5e9;
+  color: #155c31;
+  overflow-wrap: anywhere;
+}
+
+.message.visible {
+  display: block;
+}
+
+.whatsapp-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+/* DESKTOP AND MOBILE */
+
+@media (min-width: 600px) {
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .product-card img {
+    height: 180px;
+  }
+}
+
+@media (min-width: 900px) {
+  .product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .logo h1 {
+    font-size: 18px;
+  }
+
+  .logo p {
+    font-size: 11px;
+  }
+
+  .header-cart {
+    font-size: 12px;
+    padding: 8px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <h1 id="shopName">Vikas Patel Store</h1>
+      <p id="shopTagline">Quality products at honest prices.</p>
+      <div class="location" id="shopLocation">
+        📍 Kanpur, Uttar Pradesh
+      </div>
+    </div>
+
+    <button class="header-cart" onclick="openCart()">
+      🛒 Cart <span id="headerCount">0</span>
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <h2>Welcome to Our Store!</h2>
+  <p>
+    Shop your daily essentials from the comfort of your home.
+    Choose your products, place your order, and we'll contact you to confirm.
+  </p>
+  <a href="#products" class="hero-button">Shop Now →</a>
+</section>
+
+<main class="container" id="products">
+  <h2 class="section-title">🛍️ Our Products</h2>
+
+  <input
+    id="searchInput"
+    class="search"
+    type="search"
+    placeholder="🔍 Search products..."
+    aria-label="Search products"
+  >
+
+  <nav
+    id="categoryFilters"
+    class="filters"
+    aria-label="Filter products by category"
+  ></nav>
+
+  <section
+    id="productGrid"
+    class="product-grid"
+    aria-live="polite"
+  ></section>
+
+  <section class="info-card">
+    <h2>🌟 Why Shop With Us?</h2>
+    <p>✓ Convenient online ordering</p>
+    <p>✓ Direct communication with our shop</p>
+    <p>✓ No online payment required</p>
+    <p>✓ Local delivery arrangements confirmed directly</p>
+    <p>✓ Friendly customer service</p>
+  </section>
+
+  <section class="info-card">
+    <h2>📞 Contact Us</h2>
+    <p id="contactLocation">📍 Kanpur, Uttar Pradesh</p>
+    <p>Phone: <a id="contactPhone" href="#">Configure shop phone</a></p>
+    <p>Email: <span id="contactEmail">your-email@example.com</span></p>
+    <p>For product availability and delivery details, please contact our shop.</p>
+  </section>
+</main>
+
+<footer>
+  <p>
+    © <span id="year"></span>
+    <span id="footerShopName">Vikas Patel Store</span>.
+    All rights reserved.
+  </p>
+  <p>Dream Big. Start Small. Build Smart.</p>
+</footer>
+
+<button
+  class="floating-cart"
+  onclick="openCart()"
+  aria-label="Open shopping cart"
+>
+  🛒 View Cart <span class="count" id="floatingCount">0</span>
+</button>
+
+<a
+  id="whatsappFloat"
+  class="whatsapp-float"
+  href="#"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  Chat on WhatsApp
+</a>
+
+<!-- SHOPPING CART MODAL -->
+
+<div
+  class="modal"
+  id="cartModal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="cartTitle"
+>
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2 id="cartTitle">🛒 Your Cart</h2>
+      <button
+        class="close-btn"
+        onclick="closeCart()"
+        aria-label="Close cart"
+      >×</button>
+    </div>
+
+    <div id="cartItems"></div>
+
+    <div id="cartSummary" style="display:none">
+      <div class="total-row">
+        <span>Grand Total</span>
+        <span id="grandTotal">₹0</span>
+      </div>
+
+      <button
+        class="primary-btn"
+        id="checkoutBtn"
+        onclick="showCheckout()"
+      >
+        Proceed to Checkout →
+      </button>
+    </div>
+
+    <p class="small-note" id="emptyCartNote">
+      Your cart is empty. Add some products to get started!
+    </p>
+
+    <form
+      class="checkout-form"
+      id="checkoutForm"
+      action="https://formspree.io/f/YOUR_FORMSPREE_FORM_ID"
+      method="POST"
+    >
+      <h3>📦 Delivery Details</h3>
+
+      <label for="customerName">Full Name *</label>
+      <input
+        id="customerName"
+        name="customer_name"
+        autocomplete="name"
+        maxlength="100"
+        required
+      >
+
+      <label for="customerPhone">Phone Number *</label>
+      <input
+        id="customerPhone"
+        name="customer_phone"
+        type="tel"
+        inputmode="tel"
+        autocomplete="tel"
+        pattern="[0-9+() -]{10,20}"
+        title="Enter a valid phone number"
+        required
+      >
+
+      <label for="customerAddress">Delivery Address *</label>
+      <textarea
+        id="customerAddress"
+        name="delivery_address"
+        autocomplete="street-address"
+        maxlength="1000"
+        required
+      ></textarea>
+
+      <label for="instructions">Special Instructions (Optional)</label>
+      <textarea
+        id="instructions"
+        name="special_instructions"
+        maxlength="1000"
+        placeholder="Landmark or delivery instructions..."
+      ></textarea>
+
+      <input type="hidden" name="shop_name" value="Vikas Patel Store">
+      <input type="hidden" name="order_summary" id="orderSummaryField">
+      <input type="hidden" name="grand_total" id="orderTotalField">
+      <input type="hidden" name="_subject" id="emailSubject">
+
+      <p class="small-note">
+        No online payment is collected. Your order will be sent to the shop
+        for confirmation.
+      </p>
+
+      <button type="submit" class="primary-btn" id="submitOrderBtn">
+        Place Order
+      </button>
+
+      <div
+        class="message"
+        id="orderMessage"
+        role="status"
+        aria-live="polite"
+      ></div>
+    </form>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ====================================================
+   1. SHOP SETTINGS
+   Replace these values with your real shop details.
+   ==================================================== */
+
+const SHOP = {
+  name: "Vikas Patel Store",
+  tagline: "Quality products at honest prices.",
+  location: "Kanpur, Uttar Pradesh",
+
+  // Replace with your real WhatsApp number including country code.
+  // Example format: 91 followed by your 10-digit mobile number.
+  phone: "919876543210",
+
+  email: "your-email@example.com"
+};
+
+/* ====================================================
+   2. PRODUCT CATALOG
+   Prices and products below are examples.
+   Confirm real prices and availability before publishing.
+   ==================================================== */
+
+const PRODUCTS = [
+  {
+    id: 1,
+    name: "Aashirvaad Atta (5kg)",
+    price: 280,
+    category: "Groceries",
+    description: "Whole wheat flour for everyday meals.",
+    image: "https://placehold.co/600x400/e9f4e9/146c43?text=Atta",
+    alt: "Whole wheat flour package"
+  },
+  {
+    id: 2,
+    name: "Amul Butter (500g)",
+    price: 280,
+    category: "Dairy",
+    description: "Creamy butter for bread and cooking.",
+    image: "https://placehold.co/600x400/fff3d6/795b00?text=Butter",
+    alt: "Butter package"
+  },
+  {
+    id: 3,
+    name: "Tata Salt (1kg)",
+    price: 28,
+    category: "Groceries",
+    description: "Iodized salt for everyday cooking.",
+    image: "https://placehold.co/600x400/f0f0f0/444444?text=Salt",
+    alt: "Table salt package"
+  },
+  {
+    id: 4,
+    name: "Parle-G Biscuits",
+    price: 10,
+    category: "Snacks",
+    description: "Classic biscuits for tea time.",
+    image: "https://placehold.co/600x400/fff0d7/80521d?text=Biscuits",
+    alt: "Biscuit packet"
+  },
+  {
+    id: 5,
+    name: "Maggi Noodles",
+    price: 14,
+    category: "Snacks",
+    description: "Instant noodles for a quick meal.",
+    image: "https://placehold.co/600x400/fff0e5/b52b22?text=Noodles",
+    alt: "Instant noodle packet"
+  },
+  {
+    id: 6,
+    name: "Coca-Cola (750ml)",
+    price: 40,
+    category: "Beverages",
+    description: "Soft drink for refreshments.",
+    image: "https://placehold.co/600x400/ffe8e8/aa2020?text=Soft+Drink",
+    alt: "Soft drink bottle"
+  },
+  {
+    id: 7,
+    name: "Amul Milk (1L)",
+    price: 68,
+    category: "Dairy",
+    description: "Milk for tea, coffee and breakfast.",
+    image: "https://placehold.co/600x400/e9f3ff/174b83?text=Milk",
+    alt: "Milk package"
+  },
+  {
+    id: 8,
+    name: "Fortune Sunflower Oil (1L)",
+    price: 145,
+    category: "Groceries",
+    description: "Cooking oil for daily food preparation.",
+    image: "https://placehold.co/600x400/fff6d9/775500?text=Cooking+Oil",
+    alt: "Sunflower cooking oil bottle"
+  },
+  {
+    id: 9,
+    name: "Lays Classic Chips",
+    price: 20,
+    category: "Snacks",
+    description: "Crunchy potato chips for snack time.",
+    image: "https://placehold.co/600x400/fff1df/8a4a18?text=Chips",
+    alt: "Potato chips packet"
+  },
+  {
+    id: 10,
+    name: "Bisleri Water (1L)",
+    price: 20,
+    category: "Beverages",
+    description: "Packaged drinking water.",
+    image: "https://placehold.co/600x400/e6f5ff/155b86?text=Water",
+    alt: "Packaged drinking water bottle"
+  }
+];
+
+/* ====================================================
+   3. CART STORAGE
+   ==================================================== */
+
+const CART_KEY = "vikas_patel_store_cart_v1";
+
+function loadCart() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CART_KEY) || "{}");
+    const clean = {};
+
+    for (const [id, quantity] of Object.entries(saved)) {
+      const product = PRODUCTS.find(p => p.id === Number(id));
+
+      if (
+        product &&
+        Number.isInteger(quantity) &&
+        quantity > 0 &&
+        quantity <= 99
+      ) {
+        clean[id] = quantity;
+      }
+    }
+
+    return clean;
+  } catch {
+    return {};
+  }
+}
+
+let cart = loadCart();
+let activeCategory = "All";
+
+function saveCart() {
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  } catch {
+    console.warn("Cart storage is unavailable in this browser.");
+  }
+}
+
+function getProduct(id) {
+  return PRODUCTS.find(p => p.id === Number(id));
+}
+
+function money(amount) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2
+  }).format(amount);
+}
+
+function getCartCount() {
+  return Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+}
+
+function getCartTotal() {
+  return Object.entries(cart).reduce((sum, [id, qty]) => {
+    const product = getProduct(id);
+    return sum + (product ? product.price * qty : 0);
+  }, 0);
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[character]);
+}
+
+/* ====================================================
+   4. INITIAL SHOP DETAILS
+   ==================================================== */
+
+function setupShop() {
+  document.title = SHOP.name + " | Online Shopping";
+
+  document.getElementById("shopName").textContent = SHOP.name;
+  document.getElementById("shopTagline").textContent = SHOP.tagline;
+
+  document.getElementById("shopLocation").textContent =
+    "📍 " + SHOP.location;
+
+  document.getElementById("footerShopName").textContent = SHOP.name;
+
+  document.getElementById("contactLocation").textContent =
+    "📍 " + SHOP.location;
+
+  document.getElementById("contactEmail").textContent = SHOP.email;
+
+  document.getElementById("year").textContent =
+    new Date().getFullYear();
+
+  const phoneLink = document.getElementById("contactPhone");
+
+  phoneLink.textContent = SHOP.phone;
+  phoneLink.href = "tel:+" + SHOP.phone.replace(/\D/g, "");
+
+  const whatsapp = document.getElementById("whatsappFloat");
+
+  whatsapp.href =
+    "https://wa.me/" +
+    SHOP.phone.replace(/\D/g, "") +
+    "?text=" +
+    encodeURIComponent("Hello " + SHOP.name + "! I have a question.");
+}
+
+/* ====================================================
+   5. PRODUCT FILTERS
+   ==================================================== */
+
+function renderFilters() {
+  const categories = [
+    "All",
+    ...new Set(PRODUCTS.map(product => product.category))
+  ];
+
+  document.getElementById("categoryFilters").innerHTML =
+    categories.map(category => `
+      <button
+        class="filter-btn ${
+          activeCategory === category ? "active" : ""
+        }"
+        data-category="${escapeHTML(category)}"
+        aria-pressed="${activeCategory === category}"
+      >
+        ${escapeHTML(category)}
+      </button>
+    `).join("");
+}
+
+document.getElementById("categoryFilters").addEventListener("click", event => {
+  const button = event.target.closest("[data-category]");
+  if (!button) return;
+
+  activeCategory = button.dataset.category;
+
+  renderFilters();
+  renderProducts();
+});
+
+/* ====================================================
+   6. PRODUCT SEARCH AND DISPLAY
+   ==================================================== */
+
+function renderProducts() {
+  const search = document.getElementById("searchInput")
+    .value.trim().toLowerCase();
+
+  const products = PRODUCTS.filter(product => {
+    const categoryMatch =
+      activeCategory === "All" ||
+      product.category === activeCategory;
+
+    const searchMatch =
+      product.name.toLowerCase().includes(search) ||
+      product.category.toLowerCase().includes(search) ||
+      product.description.toLowerCase().includes(search);
+
+    return categoryMatch && searchMatch;
+  });
+
+  const grid = document.getElementById("productGrid");
+
+  if (products.length === 0) {
+    grid.innerHTML =
+      '<div class="empty-products">No products found.</div>';
+    return;
+  }
+
+  grid.innerHTML = products.map(product => `
+    <article class="product-card">
+      <img
+        src="${escapeHTML(product.image)}"
+        alt="${escapeHTML(product.alt)}"
+        loading="lazy"
+        width="600"
+        height="400"
+      >
+
+      <div class="product-info">
+        <span class="product-category">
+          ${escapeHTML(product.category)}
+        </span>
+
+        <h3 class="product-name">
+          ${escapeHTML(product.name)}
+        </h3>
+
+        <p class="product-description">
+          ${escapeHTML(product.description)}
+        </p>
+
+        <div class="product-bottom">
+          <div class="product-price">
+            ${money(product.price)}
+          </div>
+
+          <button
+            class="add-btn"
+            data-add="${product.id}"
+            aria-label="Add ${escapeHTML(product.name)} to cart"
+          >
+            + Add to Cart
+          </button>
+        </div>
+      </div>
+    </article>
+  `).join("");
+}
+
+document.getElementById("searchInput").addEventListener("input", renderProducts);
+
+document.getElementById("productGrid").addEventListener("click", event => {
+  const button = event.target.closest("[data-add]");
+  if (!button) return;
+
+  addToCart(Number(button.dataset.add));
+});
+
+/* ====================================================
+   7. CART OPERATIONS
+   ==================================================== */
+
+function addToCart(id) {
+  if (!getProduct(id)) return;
+
+  if ((cart[id] || 0) >= 99) {
+    alert("Maximum quantity per product is 99.");
+    return;
+  }
+
+  cart[id] = (cart[id] || 0) + 1;
+
+  saveCart();
+  renderCart();
+
+  const button = document.querySelector(`[data-add="${id}"]`);
+
+  if (button) {
+    const originalText = button.textContent;
+    button.textContent = "✓ Added!";
+
+    setTimeout(() => {
+      if (button.isConnected) {
+        button.textContent = originalText;
+      }
+    }, 700);
+  }
+}
+
+function changeQuantity(id, difference) {
+  if (!getProduct(id)) return;
+
+  const nextQuantity = (cart[id] || 0) + difference;
+
+  if (nextQuantity <= 0) {
+    delete cart[id];
+  } else if (nextQuantity <= 99) {
+    cart[id] = nextQuantity;
+  }
+
+  saveCart();
+  renderCart();
+}
+
+function removeFromCart(id) {
+  delete cart[id];
+  saveCart();
+  renderCart();
+}
+
+function renderCart() {
+  const count = getCartCount();
+
+  document.getElementById("headerCount").textContent = count;
+  document.getElementById("floatingCount").textContent = count;
+
+  const cartItems = document.getElementById("cartItems");
+  const cartSummary = document.getElementById("cartSummary");
+  const emptyNote = document.getElementById("emptyCartNote");
+
+  const entries = Object.entries(cart).filter(([id, quantity]) =>
+    getProduct(id) && quantity > 0
+  );
+
+  if (entries.length === 0) {
+    cartItems.innerHTML = "";
+    cartSummary.style.display = "none";
+    emptyNote.style.display = "block";
+
+    document.getElementById("checkoutForm").classList.remove("visible");
+    return;
+  }
+
+  emptyNote.style.display = "none";
+  cartSummary.style.display = "block";
+
+  cartItems.innerHTML = entries.map(([id, quantity]) => {
+    const product = getProduct(id);
+    const subtotal = product.price * quantity;
+
+    return `
+      <div class="cart-item">
+        <div>
+          <h3>${escapeHTML(product.name)}</h3>
+          <p>${money(product.price)} each</p>
+
+          <div class="quantity-controls">
+            <button
+              data-minus="${id}"
+              aria-label="Decrease quantity"
+            >−</button>
+
+            <span>${quantity}</span>
+
+            <button
+              data-plus="${id}"
+              aria-label="Increase quantity"
+              ${quantity >= 99 ? "disabled" : ""}
+            >+</button>
+
+            <button
+              class="remove-btn"
+              data-remove="${id}"
+            >Remove</button>
+          </div>
+        </div>
+
+        <div class="item-subtotal">
+          ${money(subtotal)}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("grandTotal").textContent =
+    money(getCartTotal());
+}
+
+document.getElementById("cartItems").addEventListener("click", event => {
+  const minus = event.target.closest("[data-minus]");
+  const plus = event.target.closest("[data-plus]");
+  const remove = event.target.closest("[data-remove]");
+
+  if (minus) changeQuantity(Number(minus.dataset.minus), -1);
+  if (plus) changeQuantity(Number(plus.dataset.plus), 1);
+  if (remove) removeFromCart(Number(remove.dataset.remove));
+});
+
+/* ====================================================
+   8. CART MODAL
+   ==================================================== */
+
+function openCart() {
+  renderCart();
+
+  document.getElementById("cartModal").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeCart() {
+  document.getElementById("cartModal").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("cartModal").addEventListener("click", event => {
+  if (event.target.id === "cartModal") closeCart();
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeCart();
+});
+
+function showCheckout() {
+  if (!getCartCount()) return;
+
+  const form = document.getElementById("checkoutForm");
+
+  form.classList.add("visible");
+
+  form.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+/* ====================================================
+   9. COMPLETE EMAIL ORDER SUMMARY
+   ==================================================== */
+
+function buildOrderSummary() {
+  const lines = [
+    "NEW CUSTOMER ORDER",
+    "Shop: " + SHOP.name,
+    "Location: " + SHOP.location,
+    "----------------------------------------",
+    "ITEMS:"
+  ];
+
+  for (const [id, quantity] of Object.entries(cart)) {
+    const product = getProduct(id);
+
+    if (!product || quantity <= 0) continue;
+
+    lines.push(
+      product.name +
+      " | Quantity: " + quantity +
+      " | Unit Price: " + money(product.price) +
+      " | Subtotal: " + money(product.price * quantity)
+    );
+  }
+
+  lines.push("----------------------------------------");
+  lines.push("GRAND TOTAL: " + money(getCartTotal()));
+  lines.push("");
+  lines.push(
+    "Customer Name: " +
+    document.getElementById("customerName").value.trim()
+  );
+  lines.push(
+    "Customer Phone: " +
+    document.getElementById("customerPhone").value.trim()
+  );
+  lines.push(
+    "Delivery Address: " +
+    document.getElementById("customerAddress").value.trim()
+  );
+  lines.push(
+    "Special Instructions: " +
+    (
+      document.getElementById("instructions").value.trim() ||
+      "None"
+    )
+  );
+
+  return lines.join("\n");
+}
+
+/* ====================================================
+   10. CHECKOUT AND FORMSPREE EMAIL
+   ==================================================== */
+
+const checkoutForm = document.getElementById("checkoutForm");
+
+checkoutForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!getCartCount()) {
+    alert("Your cart is empty.");
+    return;
+  }
+
+  if (!checkoutForm.reportValidity()) return;
+
+  const formAction = checkoutForm.getAttribute("action");
+
+  if (formAction.includes("YOUR_FORMSPREE_FORM_ID")) {
+    alert(
+      "Email setup is not complete. Create a Formspree form, " +
+      "then replace YOUR_FORMSPREE_FORM_ID in the HTML."
+    );
+    return;
+  }
+
+  const submitButton = document.getElementById("submitOrderBtn");
+  const message = document.getElementById("orderMessage");
+
+  document.getElementById("orderSummaryField").value =
+    buildOrderSummary();
+
+  document.getElementById("orderTotalField").value =
+    money(getCartTotal());
+
+  document.getElementById("emailSubject").value =
+    "New Order - " + SHOP.name;
+
+  submitButton.disabled = true;
+  submitButton.textContent = "Submitting Order...";
+  message.classList.remove("visible");
+  message.replaceChildren();
+
+  try {
+    const response = await fetch(formAction, {
+      method: "POST",
+      body: new FormData(checkoutForm),
+      headers: {
+        Accept: "application/json"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("The order could not be submitted.");
+    }
+
+    /*
+      Only clear the cart after the email service accepts the order.
+    */
+
+    cart = {};
+    saveCart();
+    renderCart();
+
+    checkoutForm.reset();
+    checkoutForm.classList.remove("visible");
+
+    const confirmation = document.createElement("p");
+
+    confirmation.textContent =
+      "Order placed! " + SHOP.name +
+      " will contact you on WhatsApp to confirm.";
+
+    message.appendChild(confirmation);
+
+    const whatsappLink = document.createElement("a");
+
+    whatsappLink.className = "whatsapp-link";
+    whatsappLink.target = "_blank";
+    whatsappLink.rel = "noopener noreferrer";
+
+    whatsappLink.href =
+      "https://wa.me/" +
+      SHOP.phone.replace(/\D/g, "") +
+      "?text=" +
+      encodeURIComponent(
+        "Hello " + SHOP.name +
+        ", I have placed an order. Please confirm my order."
+      );
+
+    whatsappLink.textContent = "Message the shop on WhatsApp →";
+
+    message.appendChild(whatsappLink);
+    message.classList.add("visible");
+
+    /*
+      Keep confirmation visible even though the cart is empty.
+    */
+
+    document.getElementById("emptyCartNote").style.display = "none";
+    document.getElementById("cartSummary").style.display = "none";
+    document.getElementById("cartItems").innerHTML = "";
+
+    message.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest"
+    });
+
+  } catch (error) {
+    message.textContent =
+      "We could not submit your order. Please check your connection " +
+      "and try again, or contact the shop on WhatsApp.";
+
+    message.classList.add("visible");
+
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Place Order";
+  }
+});
+
+/* ====================================================
+   11. START WEBSITE
+   ==================================================== */
+
+setupShop();
+renderFilters();
+renderProducts();
+renderCart();
+</script>
+
+</body>
+</html>
